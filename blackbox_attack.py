@@ -178,7 +178,6 @@ class blackbox_attack:
 
         self.stage = 0
 
-        self.init_op = tf.global_variables_initializer()
 
     def set_img_modifier(self):
         pass
@@ -227,18 +226,11 @@ class blackbox_attack:
         CONST = self.INIT_CONST
         self.current_const = CONST
         upper_bound = 1e10
-        # convert img to float32 to avoid numba error
-        # img = img.astype(np.float32)
 
         # set the upper and lower bounds for the modifier
         if not self.USE_TANH:
             self.modifier_up = 0.5 - img.reshape(-1)
             self.modifier_down = -0.5 - img.reshape(-1)
-
-        # clear the modifier
-        # self.real_modifier.fill(0.0)
-        # print("load modifier")
-        # self.real_modifier = np.load("modifier.npy")
 
         # the over all best l2, score, and image attack
         o_bestl2 = 1e10
@@ -248,9 +240,6 @@ class blackbox_attack:
         # inner best l2 and scores
         bestl2 = 1e10
         bestscore = -1
-
-
-        self.sess.run(self.init_op)
 
         # setup the variables
         self.sess.run(self.setup, {self.assign_timg: img,
@@ -301,7 +290,6 @@ class blackbox_attack:
                 # print a message if it is the first attack found
                 if o_bestl2 == 1e10:
                     #print("save modifier")
-                    #np.save("modifier.npy", self.real_modifier)
                     print("[STATS][FirstAttack] iter:{}, const:{}, cost:{}, time:{:.3f}, size:{}, loss:{:.5g}, loss1:{:.5g}, loss2:{:.5g}, l2:{:.5g}".format(iteration, CONST, self.eval_costs, self.train_timer, self.real_modifier.shape, l, loss1, loss2, l2))
                     self.post_success_setting()
                     lower_bound = 0.0
@@ -489,22 +477,4 @@ class AutoZOOM(ZOO_RV):
 
     def get_eval_costs(self):
         return self.num_rand_vec + 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
