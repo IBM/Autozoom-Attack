@@ -43,8 +43,7 @@ def main(args):
         elif args['dataset'] == "cifar10":
             data, model = CIFAR(), CIFARModel("models/cifar", sess, use_softmax=True)
         elif args['dataset'] == "imagenet":
-            # data, model = ImageNet(data_path=args["imagenet_dir"], targetFile=args["attack_single_img"]), InceptionModel(sess, use_softmax=True)
-            data, model = ImageNetDataNP(), InceptionModel(sess, use_softmax=True)
+            data, model = ImageNet(data_path=args["imagenet_dir"], targetFile=args["attack_single_img"]), InceptionModel(sess, use_softmax=True)
         elif args['dataset'] == "imagenet_np":
             data, model = ImageNetDataNP(), InceptionModel(sess, use_softmax=True)
 
