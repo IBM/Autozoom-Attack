@@ -399,7 +399,7 @@ class ZOO_AE(ZOO):
             self.decoder_output =  self.decoder(self.modifier)
             self.img_modifier = tf.image.resize_images(self.decoder_output, [self.image_size, self.image_size])
 
-class ZOO_RV(blackbox_attack):
+class AutoZOOM_BiLIN(blackbox_attack):
     def __init__(self, sess, model, args):
         super().__init__(sess, model, args);
         
@@ -450,7 +450,7 @@ class ZOO_RV(blackbox_attack):
         self.grad = np.zeros((self.num_rand_vec, self.var_size), dtype = np.float32)
         print("Set random vector number to :{}".format(self.num_rand_vec))
 
-class AutoZOOM(ZOO_RV):
+class AutoZOOM_AE(AutoZOOM_BiLIN):
     def __init__(self, sess, model, args, decoder, codec):
         self.codec = codec
         self.decoder = decoder

@@ -32,7 +32,7 @@ from setup_inception import ImageNet, InceptionModel, ImageNetDataNP
 from setup_codec import CODEC
 
 import Utils as util
-from blackbox_attack import ZOO, ZOO_AE, ZOO_RV, AutoZOOM
+from blackbox_attack import ZOO, ZOO_AE, AutoZOOM_BiLIN, AutoZOOM_AE
 import argparse
 
 def main(args):
@@ -43,9 +43,10 @@ def main(args):
         elif args['dataset'] == "cifar10":
             data, model = CIFAR(), CIFARModel("models/cifar", sess, use_softmax=True)
         elif args['dataset'] == "imagenet":
-            data, model = ImageNet(data_path=args["imagenet_dir"], targetFile=args["attack_single_img"]), InceptionModel(sess, use_softmax=True)
-        elif args['dataset'] == "imagenet_np":
+            # data, model = ImageNet(data_path=args["imagenet_dir"], targetFile=args["attack_single_img"]), InceptionModel(sess, use_softmax=True)
             data, model = ImageNetDataNP(), InceptionModel(sess, use_softmax=True)
+        # elif args['dataset'] == "imagenet_np":
+            
 
 
         if len(data.test_labels) < args["num_img"]:
@@ -90,7 +91,7 @@ def main(args):
 
 
         # attack related settings
-        if args["attack_method"] == "zoo" or args["attack_method"] == "zoo_rv":
+        if args["attack_method"] == "zoo" or args["attack_method"] == "autozoom_bilin":
             if args["img_resize"] is None:
                 args["img_resize"] = model.image_size
                 print("Argument img_resize is not set and not using autoencoder, set to image original size:{}".format(args["img_resize"]))
@@ -106,7 +107,7 @@ def main(args):
                 print("Argument batch_size is not used")
                 args["batch_size"] = 1 # force to be 1
 
-        if args["attack_method"] == "zoo_ae" or args["attack_method"] == "autozoom":
+        if args["attack_method"] == "zoo_ae" or args["attack_method"] == "autozoom_ae":
             #_, decoder = util.load_codec(args["codec_prefix"])
             if args["dataset"] == "mnist" or args["dataset"] == "cifar10":
                 codec = CODEC(model.image_size, model.num_channels, args["compress_mode"], use_tanh=False)
@@ -124,10 +125,10 @@ def main(args):
             blackbox_attack = ZOO(sess, model, args)
         elif args["attack_method"] == "zoo_ae":
             blackbox_attack = ZOO_AE(sess, model, args, decoder)
-        elif args["attack_method"] == "zoo_rv":
-            blackbox_attack = ZOO_RV(sess, model, args)
-        elif args["attack_method"] == "autozoom":
-            blackbox_attack = AutoZOOM(sess, model, args, decoder, codec)
+        elif args["attack_method"] == "autozoom_bilin":
+            blackbox_attack = AutoZOOM_BiLIN(sess, model, args)
+        elif args["attack_method"] == "autozoom_ae":
+            blackbox_attack = AutoZOOM_AE(sess, model, args, decoder, codec)
 
 
         save_prefix = os.path.join(args["save_path"], args["dataset"], args["attack_method"], args["attack_type"])
@@ -149,7 +150,7 @@ def main(args):
 
             # print information
             print("[Info][Start]{}: test_index:{}, true label:{}, target label:{}".format(i, test_index, true_class, target_class))
-            if args["attack_method"] == "zoo_ae" or args["attack_method"] == "autozoom":
+            if args["attack_method"] == "zoo_ae" or args["attack_method"] == "autozoom_ae":
                 #print ae info
                 if args["dataset"] == "mnist" or args["dataset"] == "cifar10":
                     temp_img = all_orig_img[i:i+1]
@@ -216,12 +217,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-a", "--attack_method", default="autozoom", choices=["zoo", "zoo2", "zoo_ae", "zoo_rv", "autozoom"], help="the attack method")
+    parser.add_argument("-a", "--attack_method", default="autozoom", choices=["zoo", "zoo_ae", "autozoom_bilin", "autozoom_ae"], help="the attack method")
     parser.add_argument("-b", "--batch_size", type=int, default=None, help="the batch size for zoo, zoo_ae attack")
     parser.add_argument("-c", "--init_const", type=float, default=1, help="the initial setting of the constant lambda")
     parser.add_argument("-d", "--dataset", default="mnist", choices=["mnist", "cifar10", "imagenet", "imagenet_np"])
     parser.add_argument("-n", "--num_img", type=int, default=100, help = "number of test images to attack")
-    parser.add_argument("-m", "--max_iterations", type=int, default=0, help = "set 0 to use default value")
+    parser.add_argument("-m", "--max_iterations", type=int, default=0, help = "set 0 to use the default value")
     parser.add_argument("-p", "--print_every", type=int, default=100, help="print information every PRINT_EVERY iterations")
     parser.add_argument("-s", "--save_path", default=None, help="the path to save the results")
     parser.add_argument("--attack_type", default="targeted", choices=["targeted", "untargeted"], help="the type of attack")
@@ -231,7 +232,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_rand_vec", type=int, default=1, help="the number of random vector for post success iteration")
     parser.add_argument("--seed", type=int, default=9487, help="random seed")
     parser.add_argument("--img_offset", type=int, default=0, help="the offset of the image index when getting attack data")
-    parser.add_argument("--img_resize", default=None, type=int, help = "this option only works for ATTACK METHOD zoo and zoo_rv")
+    parser.add_argument("--img_resize", default=None, type=int, help = "this option only works for ATTACK METHOD zoo and autozoom_bilin")
     parser.add_argument("--switch_iterations", type=int, default=1000, help="the iteration number for dynamic switching")
     parser.add_argument("--imagenet_dir", default=None, help="the path for imagenet images")
     parser.add_argument("--attack_single_img", default=None, help="attack a specific image, only works when DATASET is imagenet")
@@ -270,7 +271,7 @@ if __name__ == "__main__":
     # imagenet
     if args["dataset"] == "imagenet" or args["dataset"] == "imagenet_np":
         if args["max_iterations"] == 0:
-            if args["attack_method"] == "zoo_rv" or args["attack_method"] == "autozoom":
+            if args["attack_method"] == "autozoom_bilin" or args["attack_method"] == "autozoom_ae":
                 args["max_iterations"] = 100000
             else:
                  args["max_iterations"] = 20000
@@ -302,7 +303,7 @@ if __name__ == "__main__":
         args["compress_mode"] = 2
 
     if args["img_resize"] is not None:
-        if args["attack_method"] == "zoo_ae" or args["attack_method"] == "autozoom":
+        if args["attack_method"] == "zoo_ae" or args["attack_method"] == "autozoom_ae":
             print("Attack method {} cannot use option img_resize, arugment ignored".format(args["attack_method"]))
 
     if args["save_path"] is None:

@@ -36,18 +36,18 @@ Several options can be used to configure the attacks:
 
 ### Attack methods
 
-We provide four kinds of attacking methods: **zoo**, **zoo_ae**, **zoo_rv** and **autozoom**.
-The method **zoo** uses the method proposed in [ZOO: Zeroth Order Optimization based Black-box Attacks to Deep Neural Networks without Training Substitute Models](https://arxiv.org/abs/1708.03999). For **zoo_ae**, autoencoders are used to reduce the size of attack space. Random vectors are used in **zoo_rv** for gradient estimation. In **autozoom**, both autoencoder and random vector are used for efficient blackbox attack. The attack method can be specified using `-a` or `--attack_method`.
+We provide four kinds of attacking methods: **zoo**, **zoo_ae**, **autozoom_bilin** and **autozoom_ae**.
+The method **zoo** uses the method proposed in [ZOO: Zeroth Order Optimization based Black-box Attacks to Deep Neural Networks without Training Substitute Models](https://arxiv.org/abs/1708.03999). For **zoo_ae**, autoencoders are used to reduce the size of attack space. Random vectors are used in **autozoom_bilin** for gradient estimation. In **autozoom_ae**, both autoencoder and random vector are used for efficient blackbox attack. The attack method can be specified using `-a` or `--attack_method`.
 
 ### Batch size
-For **zoo** and **zoo_ae**, attacks are performed in batch. Use `-b` or `--batch_size` to specify the number of pixels updated within one iteration. For **zoo_rv**, **autozoom**, this option is not valid.
+For **zoo** and **zoo_ae**, attacks are performed in batch. Use `-b` or `--batch_size` to specify the number of pixels updated within one iteration. For **autozoom_bilin**, **autozoom_ae**, this option is not valid.
 
 ### Initial constant and switch iterations
 The attacking procedure uses a constant to determine the preference between the likelihood of a success attack and the distortion of the image. A large constant results in fast attack (less iteration) but also indicates large distortion. This constant will be adjusted after several iterations. To specify the initial setting of the constant, use `-c` or `--init_const`. The number of iterations to update the constant can be specified using `--switch_iterations`.
 
 
 ### Attack space
-For **zoo** and **zoo_rv**, you can specify the size on the attacking space using `--img_resize`. For **zoo_ae** and **autozoom**  the size of the attacking space is defined by the autoencoder.
+For **zoo** and **autozoom_bilin**, you can specify the size on the attacking space using `--img_resize`. For **zoo_ae** and **autozoom_ae**  the size of the attacking space is defined by the autoencoder.
 
 ### Dataset
 Specify the dataset using `-d` or `--dataset`.
@@ -62,7 +62,7 @@ Use `-m` or `--max_iterations` to specify the number of the maximum iteration fo
 Two kinds of attack types can be specified: `targeted` and `untargeted`.
 
 ### Codec prefix
-This argument should be provided when using **zoo_ae** or **autozoom**. The program will load the codec based on this argument. See the example below.
+This argument should be provided when using **zoo_ae** or **autozoom_ae**. The program will load the codec based on this argument. See the example below.
 
 ## Examples
 Here we provide several examples 
@@ -93,9 +93,9 @@ This will attack 100 images of the **cifar10** dataset using the **zoo_ae** meth
 3. 
 
 ```
-python3 main.py -a autozoom -d imagenet -n 1 --img_offset 9 \
+python3 main.py -a autozoom_ae -d imagenet -n 1 --img_offset 9 \
  --m 100000 --switch_iterations 1000 --init_const 10 \
- --codec_prefix codec/imagenet_3 --random_target
+ --codec_prefix codec/imagenet_3 --random_target --num_rand_vec 4
 ```
 
 This will attack the 10-th (index starts from 0) image of the **imagenet** dataset using the **autozoom** method. We specify the codec prefix as `codec/imagenet_3` so that both `codec/imagenet_3_encoder.h5` and `codec/imagenet_3_decoder.h5` will be loaded. 
