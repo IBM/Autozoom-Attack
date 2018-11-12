@@ -1,5 +1,5 @@
 # Autozoom-Attack
-Codes for reproducing query-efficient black-box attacks in  “[AutoZOOM: Autoencoder-based Zeroth Order Optimization Method for Attacking Black-box Neural Networks](https://arxiv.org/abs/1805.11770)” ​​​​​​
+Codes for reproducing query-efficient black-box attacks in  “[AutoZOOM: Autoencoder-based Zeroth Order Optimization Method for Attacking Black-box Neural Networks](https://arxiv.org/abs/1805.11770)”, published at AAAI 2019 ​​​​​​
 
 
 # Software version
