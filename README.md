@@ -98,4 +98,16 @@ python3 main.py -a autozoom_ae -d imagenet -n 1 --img_offset 9 \
  --codec_prefix codec/imagenet_3 --random_target --num_rand_vec 4
 ```
 
-This will attack the 10-th (index starts from 0) image of the **imagenet** dataset using the **autozoom** method. We specify the codec prefix as `codec/imagenet_3` so that both `codec/imagenet_3_encoder.h5` and `codec/imagenet_3_decoder.h5` will be loaded. 
+This will attack the 10-th (index starts from 0) image of the **imagenet** dataset using the **autozoom_ae** method. We specify the codec prefix as `codec/imagenet_3` so that both `codec/imagenet_3_encoder.h5` and `codec/imagenet_3_decoder.h5` will be loaded. 
+
+
+4. 
+
+```
+python3 main.py -a autozoom_bilin -d imagenet -n 1 --img_offset 9 \
+ --m 100000 --switch_iterations 1000 --init_const 10 \
+ --img_resize 32 --random_target --num_rand_vec 4
+```
+
+This will attack the 10-th (index starts from 0) image of the **imagenet** dataset using the **autozoom_bilin** method. Note that the attack space is resize to 32 (32x32x3) to accelerate the attack process.
+
