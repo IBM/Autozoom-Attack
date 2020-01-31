@@ -257,7 +257,8 @@ class blackbox_attack:
         self.stage = 0
 
         self.eval_costs = 0
-
+        self.real_modifier.fill(0.0)
+        
         #np.random.seed(1234)
         attack_begin_time = time.time()
         for iteration in range(self.MAX_ITER):
@@ -272,7 +273,7 @@ class blackbox_attack:
 
             # reset ADAM states when a valid example has been found
             if loss1 == 0.0 and last_loss1 != 0.0 and self.stage == 0:
-                # we have reached the fine tunning point
+                # we have reached the fine tuning point
                 # reset ADAM to avoid overshoot
 
                 print("##### Reset ADAM #####")
